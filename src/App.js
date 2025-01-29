@@ -53,36 +53,66 @@ const average = (arr) =>
 const KEY = 'af9e688e'
 
 export default function App() {
+  const [query, setQuery] = useState('interception')
   const [movies, setMovies] = useState([])
   const [watched, setWatched] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const query = 'interstellar'
+  const tempQuery = 'interstellar'
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true)
-        const res = await fetch(
-          `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-        )
+  // useEffect(function () {
+  //   console.log('After initial render')
+  // }, [])
 
-        if (!res.ok)
-          throw new Error('Something went wrong with fetching movies')
+  // useEffect(function () {
+  //   console.log('After every render')
+  // })
 
-        const data = await res.json()
-        if (data.Response === 'False') throw new Error('Movie not found')
+  // useEffect(
+  //   function () {
+  //     console.log('D')
+  //   },
+  //   [query]
+  // )
 
-        setMovies(data.Search)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setIsLoading(false)
+  // console.log('During render')
+
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true)
+          setError('')
+
+          const res = await fetch(
+            `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
+          )
+
+          if (!res.ok)
+            throw new Error('Something went wrong with fetching movies')
+
+          const data = await res.json()
+          if (data.Response === 'False') throw new Error('Movie not found')
+
+          setMovies(data.Search)
+          console.log(movies)
+        } catch (err) {
+          setError(err.message)
+        } finally {
+          setIsLoading(false)
+        }
       }
-    }
 
-    fetchMovies()
-  }, [])
+      if (query.length < 3) {
+        setMovies([])
+        setError('')
+        return
+      }
+
+      fetchMovies()
+    },
+    [query]
+  )
 
   function Loader() {
     return <p className='loader'>Loading...</p>
@@ -99,7 +129,7 @@ export default function App() {
   return (
     <>
       <NavBar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
 
@@ -136,9 +166,7 @@ function Logo() {
   )
 }
 
-function Search() {
-  const [query, setQuery] = useState('')
-
+function Search({ query, setQuery }) {
   return (
     <input
       className='search'
