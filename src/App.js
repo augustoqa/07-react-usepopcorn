@@ -285,6 +285,14 @@ function MovieDetails({ selectedId, watched, onCloseMovie, onAddWatched }) {
     Genre: genre,
   } = movie
 
+  useEffect(
+    function () {
+      if (!title) return
+      document.title = `Movie | ${title}`
+    },
+    [title]
+  )
+
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
